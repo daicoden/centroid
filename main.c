@@ -21,7 +21,7 @@ typedef struct {
 
 
 // comment for problem 1, set to `1' for problem 2
-//#define MULTI_CLIENT_AVERAGE 0
+#define MULTI_CLIENT_AVERAGE 0
 
 sockserv_t* server = NULL;
 
@@ -97,5 +97,7 @@ void parse_y_values(const char *buffer, u_short* y_value_buffer_out) {
 }
 
 static void cleanup() {
-//    sockserv_destroy(server);
+    // sockserv_destroy is in sockserv.h but not implemented in sockserv.c.
+    // fails with `Undefined symbols for architecture x86_64'.
+    //sockserv_destroy(server);
 }
