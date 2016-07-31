@@ -1,0 +1,45 @@
+I
+  Write a C program that listens for connections on network socket
+  port number 34543.  You only need to write the server, and can
+  test it with the "telnet" program as shown below.  Write your
+  server so it expects five unsigned short (16-bit) integers on a
+  line to be sent over the connection as ASCII text, delimited
+  by spaces and a newline at the end.  In response, calculate a
+  centroid (down to hundredths of a unit), assuming that the five
+  integers represent positions -2, -1, 0, 1, and 2 on an axis.  If
+  the line "3 4 5 4 3<enter>" was received, the server should
+  reply "0.00" since the center is at x=0.  Here is another example,
+  this time shown with telnet:
+
+... start the server, then ...
+	
+# telnet 127.0.0.1 34543
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+1 2 3 4 5
+0.67
+_
+
+  "1 2 3 4 5" is what you send, "0.67" is the correct response.
+
+  The connection should be reusable, such that if a new input line
+  was sent, a new centroid will be returned without requiring the
+  connection to be torn down and reestablished.
+
+  This is not a socket programming exercise.  I'd like you to use
+  the included event-driven API library that will handle all of
+  the socket operations for you.  HINT: documentation for my library
+  exists on the internet, and it is called "libsockio".  If you
+  choose to write everything from scratch, it's not necessarily
+  better than showing you can figure out the library, especially
+  if it ends up under-performing.
+
+  If you can solve the problem without too much pain given the
+  information here, that's great, but it's expected you might have
+  questions for me, so don't hesitate to ask for more information
+  at any time.  Also let me know if you have trouble getting the
+  provided libsockio code to run on your computer (it should work
+  with Linux, cygwin, Mac OSX, or any other flavor unix anywhere that
+  you have the free GNU compiler tools installed.)  You are welcome
+  to come in to the lab to use our computers if you need them.

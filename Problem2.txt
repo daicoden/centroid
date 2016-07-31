@@ -1,0 +1,6 @@
+
+  Now modify your solution to Problem 1 so that when multiple clients
+  are connected at once, the centroid returned is the average of the
+  most recent centroids for all currently connected clients.  When a
+  new client connects but hasn't sent a valid line, or sends a line
+  with no centroid, use 0.00 for its contribution.
