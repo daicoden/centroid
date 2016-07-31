@@ -11,7 +11,10 @@ static void* add_client(unsigned char[4]);
 static void delete_client(void*, char*);
 static void receive(void*, char*);
 static void cleanup();
-static void parse_y_values(const char*, u_short*);
+static int parse_y_values(const char*, u_short*, int);
+
+// max u_short is is 65535 so 5 max chars
+static const int SHORT_CHAR_LENGTH = 5;
 
 // Contains memory space for calculating centroids per client
 typedef struct {
@@ -55,7 +58,12 @@ void receive(void * cinfo, char* buffer) {
     printf("Received packed from client: %s\n", buffer);
     client_info_t* client_info = (client_info_t*)cinfo;
     printf("Parsing y values\n");
-    parse_y_values(buffer, client_info->y_values);
+    int error;
+    if ((error = parse_y_values(buffer, client_info->y_values, CENTROID_AXIS_SIZE)) != 0) {
+        printf("Invalid Input\n");
+        sprintf(buffer, "Invalid Input (5 numbers < 65536 which define valid polygon(s)). code: %d", error);
+        return;
+    }
     printf("Calculating centroid\n");
     calculate_centroid(client_info->y_values, &client_info->last_calculated_centroid);
 
@@ -75,25 +83,56 @@ void receive(void * cinfo, char* buffer) {
 #endif
 }
 
+/**
+ * Parses out shorts from space delimited ascii text
+ * @param buffer input containing space delimited ascii numbers
+ * @param y_value_buffer_out array of u_short's to populate.
+ * @return 0 if parsed correctly, any other number if invalid input
+ *         -1 number bigger than a short
+ *         -2 too many or too few numbers
+ *         -3 no polygon (all 0 input)
+ */
 // Apologies C is really rusty
-void parse_y_values(const char *buffer, u_short* y_value_buffer_out) {
+int parse_y_values(const char *buffer, u_short* y_value_buffer_out, int y_value_buffer_length) {
     int y_index = 0;
-    // max input is 65536 so 5 max chars
-    char* parsed_number = malloc(sizeof(char)*CENTROID_AXIS_SIZE);
+    char* parsed_number = malloc(sizeof(char)*SHORT_CHAR_LENGTH);
     int parsed_number_index = 0;
-    memset(parsed_number, 0, sizeof(char)*CENTROID_AXIS_SIZE);
+    memset(parsed_number, 0, sizeof(char)*SHORT_CHAR_LENGTH);
 
     for (int i = 0; buffer[i]; i++) {
         if (buffer[i] == ' ') {
-            y_value_buffer_out[y_index++] = (u_short) atoi(parsed_number);
-            memset(parsed_number, 0, sizeof(char)*CENTROID_AXIS_SIZE);
+            // Overflow
+            if (y_index >= y_value_buffer_length) {
+                return -2;
+            }
+            int converted_number = atoi(parsed_number);
+            if (converted_number > UINT16_MAX) {
+                return -1;
+            }
+
+            y_value_buffer_out[y_index++] = (u_short) converted_number;
+            memset(parsed_number, 0, sizeof(char)*SHORT_CHAR_LENGTH);
             parsed_number_index = 0;
         } else {
+            // overflow
+            if (parsed_number_index >= 5) { return -1; }
             parsed_number[parsed_number_index++] = buffer[i];
         }
     }
+    // overflow
+    if (parsed_number_index >= 5) { return -1; }
+    // not enough characters
+    if (y_index != y_value_buffer_length - 1) { return -2; }
+
     y_value_buffer_out[y_index] = (u_short) atoi(parsed_number);
+    int ittr = 0;
+    for (ittr = 0; ittr < y_value_buffer_length; ittr++) {
+        if (y_value_buffer_out[ittr] != 0) { break; }
+    }
+    if (ittr == y_value_buffer_length) { return -3; }
+
     free(parsed_number);
+    return 0;
 }
 
 static void cleanup() {

@@ -18,10 +18,9 @@ typedef struct {
 } centroid_t;
 
 /**
- * y_values should match the same dimension as CENTROID_AXIS
- *
- * centroid_out will contain the x coordinate of centroid for the polygon described by y_values, and the
- * total area (weight) of the polygon described by y_values.
+ * @param y_values the y values creating the polygon with the x axis. This must be the same length as CENTROID_AXIS
+ * @param centroid_out centroid_out will contain the x coordinate of centroid for the polygon described by y_values,
+ *                     and the total area (weight) of the polygon described by y_values.
  */
 void calculate_centroid(u_short y_values[], centroid_t* centroid_out);
 
