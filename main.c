@@ -105,7 +105,7 @@ int parse_y_values(const char *buffer, u_short* y_value_buffer_out, int y_value_
             if (y_index >= y_value_buffer_length) {
                 return -2;
             }
-            int converted_number = atoi(parsed_number);
+            u_int converted_number = (u_int) atoi(parsed_number);
             if (converted_number > UINT16_MAX) {
                 return -1;
             }
